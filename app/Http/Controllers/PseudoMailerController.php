@@ -54,8 +54,7 @@ class PseudoMailerController extends Controller
             ->header('content_type', 'application/json');
     }
 
-    public function sentMails(Request $request)
-    {
+    public function sentMails(Request $request) {
         $response = array();
         $result = array();
 
@@ -83,6 +82,65 @@ class PseudoMailerController extends Controller
             $response['code'] = 200;
             $response['message'] = 'success';
             $response['content'] = '';
+        } else {
+            $response['code'] = 400;
+            $response['message'] = 'error';
+            $response['content'] = '';
+        }
+
+        return response($response, $response['code'])
+            ->header('content_type', 'application/json');
+    }
+
+    public function showMailDetail(Request $request) {
+        $response = array();
+        $result = array();
+
+//        $id = $request->has('id') ? $request->input('id') : '';
+        $uuid = $request->has('uuid') ? $request->input('uuid') : '';
+
+        if ($uuid != '') {
+            $listUUID = MailModel::select('*')
+                ->where('mails.uuid', '=', $uuid)
+                ->get();
+            $uuidArray = array();
+            $uuidArray['mail_form'] = $listUUID[0]->mail_from;
+//            $uuidArray['mail_to'] = $uuidData[0]->mail_to;
+            $uuidArray['subject'] = $listUUID[0]->subject;
+//            $uuidArray['attachements'] = $uuidData[0]->attachements;
+            $uuidArray['uuid'] = $listUUID[0]->uuid;
+            $uuidArray['status'] = $listUUID[0]->status;
+            $uuidArray['created_date'] = $listUUID[0]->created_date;
+            $uuidArray['sent_at'] = $listUUID[0]->sent_at;
+            $uuidArray['opened_at'] = $listUUID[0]->opened_at;
+            $uuidArray['template'] = $listUUID[0]->template;
+            $uuidArray['id'] = array();
+            $uuidArray['mail_to'] = array();
+            $uuidArray['attachements'] = array();
+
+
+            foreach ($listUUID as $id) {
+                $idArr = array();
+                $idArr['id'] = $id->id;
+                array_push($uuidArray['id'], $idArr['id']);
+            }
+            foreach ($listUUID as $mailTo) {
+                $mailToArr = array();
+                $mailToArr['mail_to'] = $mailTo->mail_to;
+                array_push($uuidArray['mail_to'], $mailToArr['mail_to']);
+            }
+            foreach ($listUUID as $attechement) {
+                $attechementArr = array();
+                $attechementArr['attachements'] = $attechement->attachements;
+                array_push($uuidArray['attachements'], $attechementArr['attachements']);
+            }
+            array_push($result, $uuidArray);
+        }
+
+        if (isset($result)) {
+            $response['code'] = 200;
+            $response['message'] = 'success';
+            $response['content'] = $result;
         } else {
             $response['code'] = 400;
             $response['message'] = 'error';

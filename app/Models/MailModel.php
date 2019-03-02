@@ -17,12 +17,49 @@ class MailModel extends Model
     use SoftDeletes;
     protected $table = 'mails';
 
-    protected $fillable = ['mail_from', 'mail_to', 'subject', 'uuid', 'status', 'created_date', 'sent_at', 'opened_at', 'template', 'created_at', 'updated_at', ''];
+    protected $fillable = ['mail_from', 'mail_to', 'subject', 'uuid', 'status', 'created_date', 'sent_at', 'opened_at', 'template', 'created_at', 'updated_at'];
 
     public static function listMail() {
-        $list = MailModel::get();
-        if (isset($list)) {
-            return $list;
+        $uuid = MailModel::groupBy('uuid')
+            ->select('*')
+            ->get();
+        $listMail = array();
+        foreach ($uuid as $uuidData) {
+            $uuidArray = array();
+//            $uuidArray['id'] = $uuidData->id;
+            $uuidArray['mail_form'] = $uuidData->mail_from;
+//            $uuidArray['mail_to'] = $uuidData->mail_to;
+            $uuidArray['subject'] = $uuidData->subject;
+//            $uuidArray['attachements'] = $uuidData->attachements;
+            $uuidArray['uuid'] = $uuidData->uuid;
+            $uuidArray['status'] = $uuidData->status;
+            $uuidArray['created_date'] = $uuidData->created_date;
+            $uuidArray['sent_at'] = $uuidData->sent_at;
+            $uuidArray['opened_at'] = $uuidData->opened_at;
+            $uuidArray['template'] = $uuidData->template;
+            $uuidArray['id'] = array();
+            $uuidArray['mail_to'] = array();
+            $uuidArray['attachements'] = array();
+            $listMailTo = MailModel::select('id', 'mail_to', 'attachements')->where('uuid', '=', $uuidData->uuid)->get();
+            foreach ($listMailTo as $id) {
+                $idArr = array();
+                $idArr['id'] = $id->id;
+                array_push($uuidArray['id'], $idArr['id']);
+            }
+            foreach ($listMailTo as $mailTo) {
+                $mailToArr = array();
+                $mailToArr['mail_to'] = $mailTo->mail_to;
+                array_push($uuidArray['mail_to'], $mailToArr['mail_to']);
+            }
+            foreach ($listMailTo as $attechement) {
+                $attechementArr = array();
+                $attechementArr['attachements'] = $attechement->attachements;
+                array_push($uuidArray['attachements'], $attechementArr['attachements']);
+            }
+            array_push($listMail, $uuidArray);
+        }
+        if (isset($listMail)) {
+            return $listMail;
         }
     }
 }
