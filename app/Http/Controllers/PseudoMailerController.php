@@ -63,7 +63,7 @@ class PseudoMailerController extends Controller
         $subject = $request->has('subject') ? $request->input('subject') : '';
         $emailTemplate = $request->has('template') ? $request->input('template') : '';
         $uuid = uniqid();
-
+        $createdDate = date("Y-m-d h:i:s");
 //        $list = MailModel::get();
 //        print_r(json_decode($list));
 //        exit();
@@ -74,6 +74,7 @@ class PseudoMailerController extends Controller
             $createMail->mail_from = $mailFrom;
             $createMail->mail_to = $mailTo;
             $createMail->subject = $subject;
+            $createMail->created_date = $createdDate;
             $createMail->uuid = $uuid;
             $result = $createMail->save();
         }
@@ -104,7 +105,7 @@ class PseudoMailerController extends Controller
                 ->where('mails.uuid', '=', $uuid)
                 ->get();
             $uuidArray = array();
-            $uuidArray['mail_form'] = $listUUID[0]->mail_from;
+            $uuidArray['mail_from'] = $listUUID[0]->mail_from;
 //            $uuidArray['mail_to'] = $uuidData[0]->mail_to;
             $uuidArray['subject'] = $listUUID[0]->subject;
 //            $uuidArray['attachements'] = $uuidData[0]->attachements;
